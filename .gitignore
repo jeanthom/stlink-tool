@@ -1,0 +1,3 @@
+src/*.o
+tiny-AES-c/*.o
+stlink-tool
