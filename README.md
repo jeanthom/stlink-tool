@@ -1,6 +1,6 @@
 # stlink-tool
 
-libusb tool for flashing chinese ST-Link dongles. Please note that this won't replace the bootloader (meaning that you should be able to reflash the original afterwards using [ST's firmware update utility](http://www.st.com/en/development-tools/stsw-link007.html)).
+libusb tool for flashing chinese ST-Link dongles. Please note that similarly to ST's updater, the uploaded firmware won't replace the bootloader (meaning that you should be able to reflash the original afterwards using [ST's firmware update utility](http://www.st.com/en/development-tools/stsw-link007.html)).
 
 ## Compiling
 
