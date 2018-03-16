@@ -18,6 +18,8 @@ git submodule update
 make
 ```
 
+## [Writing firmwares for ST-Link dongles](docs/writing-firmware.md)
+
 ## Firmware upload protocol
 
 ST's firmware upload protocol is USB's DFU protocol with some twists. Every DFU command is issued with the 0xF3 prefix, and the command set does not exactly match USB's.
