@@ -52,7 +52,6 @@ int main(int argc, char *argv[]) {
       return EXIT_SUCCESS;
       break;
     default:
-      fprintf(stderr, "Unrecognized option %c\n", opt);
       print_help(argv);
       return EXIT_FAILURE;
       break;
