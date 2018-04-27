@@ -21,6 +21,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <libusb.h>
 
 #include "stlink.h"
@@ -28,15 +29,39 @@
 #define STLINK_VID 0x0483
 #define STLINK_PID 0x3748
 
+void print_help(char *argv[]) {
+  printf("Usage: %s [options] firmware.bin\n", argv[0]);
+  printf("Options:\n");
+  printf("\t-p\tProbe the ST-Link adapter\n");
+  printf("\t-h\tShow help\n");
+}
+
 int main(int argc, char *argv[]) {
   libusb_context *usb_ctx;
   libusb_device_handle *dev_handle;
   struct STLinkInfos infos;
-  int res, i;
-  
-  if (argc != 2) {
-    printf("Usage: %s firmware.bin\n", argv[0]);
-    return 0;
+  int res, i, opt, probe = 0;
+
+  while ((opt = getopt(argc, argv, "hp")) != -1) {
+    switch (opt) {
+    case 'p': /* Probe mode */
+      probe = 1;
+      break;
+    case 'h': /* Help */
+      print_help(argv);
+      return EXIT_SUCCESS;
+      break;
+    default:
+      fprintf(stderr, "Unrecognized option %c\n", opt);
+      print_help(argv);
+      return EXIT_FAILURE;
+      break;
+    }
+  }
+
+  if (optind >= argc && !probe) {
+    fprintf(stderr, "Error : No firmware file supplied !\n");
+    return EXIT_FAILURE;
   }
 
   res = libusb_init(&usb_ctx);
@@ -79,8 +104,8 @@ int main(int argc, char *argv[]) {
     return EXIT_SUCCESS;
   }
 
-  if (argc >= 2) {
-    stlink_flash(dev_handle, argv[1], 0x8004000, 1024, &infos);
+  if (!probe) {
+    stlink_flash(dev_handle, argv[optind], 0x8004000, 1024, &infos);
   }
 
   libusb_exit(usb_ctx);
