@@ -16,7 +16,7 @@ MEMORY {
 INCLUDE libucmx_stm32f1.ld
 ```
 
-Nothing fancy here. The only important this is that our code is offset by `0x4000` (keeping space for the bootloader which is stored in the `0x08000000`-`0x08004000` region).
+Nothing fancy here. The only important thing is that our code is offset by `0x4000` (keeping space for the bootloader which is stored in the `0x08000000`-`0x08004000` region).
 
 ## Cleaning NVIC table
 
