@@ -74,7 +74,13 @@ int main(int argc, char *argv[]) {
     return EXIT_FAILURE;
   }
 
+  if (libusb_claim_interface(dev_handle, 0)) {
+    fprintf(stderr, "Unable to claim USB interface ! Please close all programs that may communicate with an ST-Link dongle.\n");
+    return EXIT_FAILURE;
+  }
+
   if (stlink_read_infos(dev_handle, &infos)) {
+    libusb_release_interface(dev_handle, 0);
     return EXIT_FAILURE;
   }
   
@@ -94,12 +100,14 @@ int main(int argc, char *argv[]) {
 
   res = stlink_current_mode(dev_handle);
   if (res < 0) {
+    libusb_release_interface(dev_handle, 0);
     return EXIT_FAILURE;
   }
   printf("Current mode : %d\n", res);
 
   if (res != 1) {
     printf("ST-Link dongle is not in the correct mode. Please unplug and plug the dongle again.\n");
+    libusb_release_interface(dev_handle, 0);
     return EXIT_SUCCESS;
   }
 
@@ -107,6 +115,7 @@ int main(int argc, char *argv[]) {
     stlink_flash(dev_handle, argv[optind], 0x8004000, 1024, &infos);
   }
 
+  libusb_release_interface(dev_handle, 0);
   libusb_exit(usb_ctx);
   
   return EXIT_SUCCESS;
