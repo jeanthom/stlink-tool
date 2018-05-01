@@ -389,6 +389,9 @@ int stlink_flash(libusb_device_handle *dev_handle,
     flashed_bytes += cur_chunk_size;
   }
 
+  munmap(firmware, file_size);
+  close(fd);
+
   printf("\n");
 
   return 0;
