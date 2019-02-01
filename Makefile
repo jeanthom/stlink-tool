@@ -7,7 +7,7 @@ OBJS := src/main.o src/stlink.o src/crypto.o tiny-AES-c/aes.o
 	$(CC) $(CFLAGS) -o $@ -c $<
 
 stlink-tool: $(OBJS)
-	$(CC) $(LDFLAGS) $(OBJS) -o $@
+	$(CC) $(OBJS) $(LDFLAGS) -o $@
 
 clean:
 	rm -f src/*.o
