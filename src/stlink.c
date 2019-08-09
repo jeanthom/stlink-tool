@@ -123,7 +123,7 @@ int stlink_read_infos(libusb_device_handle *dev_handle,
   /* Firmware encryption key generation */
   memcpy(infos->firmware_key, data, 4);
   memcpy(infos->firmware_key+4, data+8, 12);
-  encrypt((unsigned char*)"I am key, wawawa", infos->firmware_key, 16);
+  my_encrypt((unsigned char*)"I am key, wawawa", infos->firmware_key, 16);
 
   return 0;
 }
@@ -193,7 +193,7 @@ int stlink_dfu_download(libusb_device_handle *dev_handle,
   *(uint16_t*)(download_request+6) = data_len; /* wLength */
 
   if (wBlockNum >= 2) {
-    encrypt(stlink_infos->firmware_key, data, data_len);
+    my_encrypt(stlink_infos->firmware_key, data, data_len);
   }
 
   res = libusb_bulk_transfer(dev_handle,

@@ -19,4 +19,4 @@
   OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-void encrypt(unsigned char *key, unsigned char *data, unsigned int length);
+void my_encrypt(unsigned char *key, unsigned char *data, unsigned int length);

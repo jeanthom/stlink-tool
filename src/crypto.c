@@ -36,7 +36,7 @@ static void convert_to_big_endian(unsigned char *array, unsigned int length) {
   }
 }
 
-void encrypt(unsigned char *key, unsigned char *data, unsigned int length) {
+void my_encrypt(unsigned char *key, unsigned char *data, unsigned int length) {
   struct AES_ctx ctx;
   unsigned char key_be[16];
   size_t i;
