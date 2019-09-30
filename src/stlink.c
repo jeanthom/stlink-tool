@@ -44,6 +44,7 @@
 #define DFU_CLRSTATUS 0x04
 #define DFU_GETSTATE 0x05
 #define DFU_ABORT 0x06
+#define DFU_EXIT  0x07
 
 #define GET_COMMAND 0x00
 #define SET_ADDRESS_POINTER_COMMAND 0x21
@@ -394,5 +395,28 @@ int stlink_flash(libusb_device_handle *dev_handle,
 
   printf("\n");
 
+  return 0;
+}
+
+int stlink_exit_dfu(libusb_device_handle *dev_handle)
+{
+  unsigned char data[16];
+  int rw_bytes, res;
+
+  memset(data, 0, sizeof(data));
+
+  data[0] = 0xF3;
+  data[1] = DFU_EXIT;
+
+  res = libusb_bulk_transfer(dev_handle,
+			     EP_OUT,
+			     data,
+			     16,
+			     &rw_bytes,
+			     USB_TIMEOUT);
+  if (res || rw_bytes != 16) {
+    fprintf(stderr, "USB transfer failure\n");
+    return -1;
+  }
   return 0;
 }
