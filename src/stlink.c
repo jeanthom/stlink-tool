@@ -398,16 +398,15 @@ int stlink_flash(libusb_device_handle *dev_handle,
   return 0;
 }
 
-int stlink_exit_dfu(libusb_device_handle *dev_handle)
-{
+int stlink_exit_dfu(libusb_device_handle *dev_handle) {
   unsigned char data[16];
   int rw_bytes, res;
-
+  
   memset(data, 0, sizeof(data));
-
+  
   data[0] = 0xF3;
   data[1] = DFU_EXIT;
-
+  
   res = libusb_bulk_transfer(dev_handle,
 			     EP_OUT,
 			     data,

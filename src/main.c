@@ -68,7 +68,7 @@ int main(int argc, char *argv[]) {
 					       STLINK_VID,
 					       STLINK_PID);
   if (!dev_handle) {
-    fprintf(stderr, "No Stlink in DFU mode found. Replug Stlink to flash!\n");
+    fprintf(stderr, "No ST-Link in DFU mode found. Replug ST-Link to flash!\n");
     return EXIT_FAILURE;
   }
 
@@ -110,9 +110,10 @@ int main(int argc, char *argv[]) {
   }
 
   if (!probe) {
-      if (do_load)
-          stlink_flash(dev_handle, argv[optind], 0x8004000, 1024, &infos);
-      stlink_exit_dfu(dev_handle);
+    if (do_load) {
+      stlink_flash(dev_handle, argv[optind], 0x8004000, 1024, &infos);
+    }
+    stlink_exit_dfu(dev_handle);
   }
 
   libusb_release_interface(dev_handle, 0);
