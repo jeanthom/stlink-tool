@@ -87,3 +87,4 @@ int stlink_flash(libusb_device_handle *dev_handle,
 		 unsigned int base_offset,
 		 unsigned int chunk_size,
 		 struct STLinkInfos *stlink_infos);
+int stlink_exit_dfu(libusb_device_handle *dev_handle);

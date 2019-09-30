@@ -30,10 +30,11 @@
 #define STLINK_PID 0x3748
 
 void print_help(char *argv[]) {
-  printf("Usage: %s [options] firmware.bin\n", argv[0]);
+  printf("Usage: %s [options] [firmware.bin]\n", argv[0]);
   printf("Options:\n");
   printf("\t-p\tProbe the ST-Link adapter\n");
-  printf("\t-h\tShow help\n");
+  printf("\t-h\tShow help\n\n");
+  printf("\tApplication is started when called without argument or after firmware load\n\n");
 }
 
 int main(int argc, char *argv[]) {
@@ -58,10 +59,7 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  if (optind >= argc && !probe) {
-    fprintf(stderr, "Error : No firmware file supplied !\n");
-    return EXIT_FAILURE;
-  }
+  int do_load = (optind < argc);
 
   res = libusb_init(&usb_ctx);
   (void)res;
@@ -70,7 +68,7 @@ int main(int argc, char *argv[]) {
 					       STLINK_VID,
 					       STLINK_PID);
   if (!dev_handle) {
-    fprintf(stderr, "ST-Link could not be found !\n");
+    fprintf(stderr, "No Stlink in DFU mode found. Replug Stlink to flash!\n");
     return EXIT_FAILURE;
   }
 
@@ -112,11 +110,13 @@ int main(int argc, char *argv[]) {
   }
 
   if (!probe) {
-    stlink_flash(dev_handle, argv[optind], 0x8004000, 1024, &infos);
+      if (do_load)
+          stlink_flash(dev_handle, argv[optind], 0x8004000, 1024, &infos);
+      stlink_exit_dfu(dev_handle);
   }
 
   libusb_release_interface(dev_handle, 0);
   libusb_exit(usb_ctx);
-  
+
   return EXIT_SUCCESS;
 }
