@@ -377,8 +377,8 @@ int stlink_flash(libusb_device_handle *dev_handle,
     }
 
     memcpy(firmware_chunk, firmware+flashed_bytes, cur_chunk_size);
-    memset(firmware_chunk+cur_chunk_size, 0, chunk_size-cur_chunk_size);
-    res = stlink_dfu_download(dev_handle, firmware_chunk, cur_chunk_size, 2, stlink_infos);
+    memset(firmware_chunk+cur_chunk_size, 0xff, chunk_size-cur_chunk_size);
+    res = stlink_dfu_download(dev_handle, firmware_chunk, chunk_size, 2, stlink_infos);
     if (res) {
       fprintf(stderr, "Erase error\n");
       return res;
