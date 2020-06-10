@@ -9,6 +9,8 @@ Options:
 	-h	Show help
 ```
 
+stlink-tool has been tested under Linux and macOS. With [sakana280's fork](https://github.com/sakana280/stlink-tool) you can use it under Windows.
+
 ## Compiling
 
 Required dependencies :
