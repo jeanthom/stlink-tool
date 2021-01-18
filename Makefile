@@ -1,4 +1,4 @@
-CFLAGS := -Wall -Wextra -Werror $(shell pkg-config --cflags libusb-1.0)
+CFLAGS := -Wall -Wextra -Werror $(shell pkg-config --cflags libusb-1.0) -g -Og
 LDFLAGS := $(shell pkg-config --libs libusb-1.0)
 
 OBJS := src/main.o src/stlink.o src/crypto.o tiny-AES-c/aes.o
