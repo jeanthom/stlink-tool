@@ -52,13 +52,23 @@ enum DeviceState {
   dfuERROR = 10
 };
 
-struct STLinkInfos {
+enum BlTypes {
+    STLINK_BL_V2 = 0,
+    STLINK_BL_V3
+};
+
+struct STLinkInfo {
   uint8_t firmware_key[16];
   uint8_t id[12];
   uint8_t stlink_version;
   uint8_t jtag_version;
   uint8_t swim_version;
   uint16_t loader_version;
+    libusb_context *stinfo_usb_ctx;
+    libusb_device_handle *stinfo_dev_handle;
+    unsigned char stinfo_ep_in;
+    unsigned char stinfo_ep_out;
+    enum BlTypes stinfo_bl_type;
 };
 
 struct DFUStatus {
@@ -68,23 +78,12 @@ struct DFUStatus {
   unsigned char iString : 8;
 };
 
-int stlink_read_infos(libusb_device_handle *dev_handle,
-		      struct STLinkInfos *infos);
-int stlink_current_mode(libusb_device_handle *dev_handle);
-int stlink_dfu_status(libusb_device_handle *dev_handle,
-		       struct DFUStatus *status);
-int stlink_dfu_download(libusb_device_handle *dev_handle,
+int stlink_dfu_mode(libusb_device_handle *dev_handle, int trigger);
+int stlink_read_info(struct STLinkInfo *info);
+int stlink_current_mode(struct STLinkInfo *info);
+int stlink_dfu_download(struct STLinkInfo *stlink_info,
 			unsigned char *data,
-			size_t data_len,
-			uint16_t wBlockNum,
-			struct STLinkInfos *stlink_infos);
-int stlink_erase(libusb_device_handle *dev_handle,
-		 uint32_t address);
-int stlink_set_address(libusb_device_handle *dev_handle,
-		       uint32_t address);
-int stlink_flash(libusb_device_handle *dev_handle,
-		 const char *filename,
-		 unsigned int base_offset,
-		 unsigned int chunk_size,
-		 struct STLinkInfos *stlink_infos);
-int stlink_exit_dfu(libusb_device_handle *dev_handle);
+			const size_t data_len,
+			const uint16_t wBlockNum);
+int stlink_flash(struct STLinkInfo *stlink_info, const char *filename);
+int stlink_exit_dfu(struct STLinkInfo *info);
