@@ -124,9 +124,48 @@ int stlink_read_info(struct STLinkInfo *info) {
   }
 
   info->stlink_version = data[0] >> 4;
-  info->jtag_version = (data[0] & 0x0F) << 2 | (data[1] & 0xC0) >> 6;
-  info->swim_version = data[1] & 0x3F;
-  info->loader_version = data[5] << 8 | data[4];
+
+  if (info->stlink_version < 3) {
+      info->jtag_version = (data[0] & 0x0F) << 2 | (data[1] & 0xC0) >> 6;
+      info->swim_version = data[1] & 0x3F;
+      info->loader_version = data[5] << 8 | data[4];
+
+  } else {
+      //info->product_id = data[3] << 8 | data[2];
+
+      memset(data, 0, sizeof(data));
+
+      data[0] = 0xFB;
+      data[1] = 0x80;
+
+      /* Write */
+      res = libusb_bulk_transfer(info->stinfo_dev_handle,
+				 info->stinfo_ep_out,
+				 data,
+				 16,
+				 &rw_bytes,
+				 USB_TIMEOUT);
+      if (res) {
+	  fprintf(stderr, "USB transfer failure\n");
+	  return -1;
+      }
+
+      /* Read */
+      res = libusb_bulk_transfer(info->stinfo_dev_handle,
+				 info->stinfo_ep_in,
+				 data,
+				 12,
+				 &rw_bytes,
+				 USB_TIMEOUT);
+      if (res) {
+	  fprintf(stderr, "USB transfer failure\n");
+	  return -1;
+      }
+
+      info->jtag_version = data[2];
+      info->swim_version = data[1];
+      info->loader_version = data[11] << 8 | data[10];
+  }
 
   memset(data, 0, sizeof(data));
 
@@ -162,8 +201,11 @@ int stlink_read_info(struct STLinkInfo *info) {
   /* Firmware encryption key generation */
   memcpy(info->firmware_key, data, 4);
   memcpy(info->firmware_key+4, data+8, 12);
-  my_encrypt((unsigned char*)"I am key, wawawa", info->firmware_key, 16);
-
+  if (info->stlink_version < 3) {
+      my_encrypt((unsigned char*)"I am key, wawawa", info->firmware_key, 16);
+  } else {
+      my_encrypt((unsigned char*)" found...STlink ", info->firmware_key, 16);
+  }
   return 0;
 }
 
@@ -222,6 +264,10 @@ int stlink_dfu_download(struct STLinkInfo *info,
   struct DFUStatus dfu_status;
   int rw_bytes, res;
   memset(download_request, 0, sizeof(download_request));
+
+  if (wBlockNum >= 2 && info->stlink_version == 3) {
+    my_encrypt((uint8_t*)" .ST-Link.ver.3.", data, data_len);
+  }
 
   download_request[0] = ST_DFU_MAGIC;
   download_request[1] = DFU_DNLOAD;
@@ -411,30 +457,24 @@ int stlink_flash(struct STLinkInfo *info, const char *filename) {
     }
     int wdl = 2;
     if (info->stinfo_bl_type == STLINK_BL_V3) {
-	if (((base_offset + flashed_bytes) & ((1 << 14) - 1)) == 0) {
-	    uint32_t sector_start[8] = {0x08000000, 0x08004000, 0x08008000, 0x0800C000,
-					0x08010000, 0x08020000, 0x08040000, 0x08060000};
-	    int sector = -1;
-	    int i = 0;
-	    for (; i < 8; i++) {
-		if (sector_start[i] == base_offset + flashed_bytes) {
-		    sector = i;
-		    break;
-		}
+	uint32_t address = base_offset + flashed_bytes;
+	uint32_t sector_start[8] = {0x08000000, 0x08004000, 0x08008000, 0x0800C000,
+				    0x08010000, 0x08020000, 0x08040000, 0x08060000};
+	int sector;
+	int i;
+	for (i = 0; i < 8; i++) {
+	    if (sector_start[i] == address) {
+		sector = i;
+		break;
 	    }
-	    if (i < 0) {
-		fprintf(stderr, "No sector match for address %08x\n", base_offset + flashed_bytes);
-		return i;
-	    }
-	    printf("Erase sector %d\n", sector);
+	}
+	if (i < 8) {
 	    res = stlink_sector_erase(info, sector);
 	    if (res) {
 		fprintf(stderr, "Erase sector %d failed\n", sector);
 		return res;
 	    }
 	    printf("Erase sector %d done\n", sector);
-	} else {
-	    wdl = 3;
 	}
     } else {
 	res = stlink_erase(info, base_offset + flashed_bytes);
@@ -447,15 +487,11 @@ int stlink_flash(struct STLinkInfo *info, const char *filename) {
     if (res) {
       fprintf(stderr, "set address error at 0x%08x\n", base_offset + flashed_bytes);
       return res;
-    } else {
-	printf("set address to 0x%08x done\n", base_offset + flashed_bytes);
     }
     res = stlink_dfu_download(info, firmware + flashed_bytes, chunk_size, wdl);
     if (res) {
 	fprintf(stderr, "Download error at 0x%08x\n", base_offset + flashed_bytes);
 	return res;
-    } else {
-	printf("Download at 0x%08x done\n", base_offset + flashed_bytes);
     }
 
     printf(".");
