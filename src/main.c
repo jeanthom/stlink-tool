@@ -30,6 +30,7 @@
 #define STLINK_PID 0x3748
 #define STLINK_PIDV21 0x374b
 #define STLINK_PIDV21_MSD 0x3752
+#define STLINK_PIDV3_MSD  0x374e
 #define STLINK_PIDV3      0x374f
 #define STLINK_PIDV3_BL   0x374d
 
@@ -134,6 +135,7 @@ rescan:
 	    break;
 	case STLINK_PIDV21:
 	case STLINK_PIDV21_MSD:
+	case STLINK_PIDV3_MSD:
 	case STLINK_PIDV3:
 	    res = libusb_open(dev, &info.stinfo_dev_handle);
 	    if (res < 0) {
