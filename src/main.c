@@ -83,6 +83,7 @@ rescan:
 	if (res < 0)
 	    continue;
 	if ((desc.idVendor == OPENMOKO_VID) && (desc.idProduct == BMP_APPL_PID)) {
+	    fprintf(stderr, "Trying to switch BMP/Application to bootloader\n");
 	    res = libusb_open(dev, &info.stinfo_dev_handle);
 	    if (res < 0) {
 	       fprintf(stderr, "Can not open BMP/Application!\n");
@@ -137,6 +138,8 @@ rescan:
 	case STLINK_PIDV21_MSD:
 	case STLINK_PIDV3_MSD:
 	case STLINK_PIDV3:
+	    fprintf(stderr,
+	            "Trying to switch STLINK/Application to bootloader\n");
 	    res = libusb_open(dev, &info.stinfo_dev_handle);
 	    if (res < 0) {
 	       fprintf(stderr, "Can not open STLINK/Application!\n");
@@ -150,10 +153,12 @@ rescan:
 	    stlink_dfu_mode(info.stinfo_dev_handle, 1);
 	    libusb_release_interface(info.stinfo_dev_handle, 0);
 	    libusb_free_device_list(devs, 1);
-	    fprintf(stderr, "Trying to switch STLINK/Application to bootloader\n");
 	    usleep(2000000);
 	    goto rescan;
 	    break;
+        default:
+            fprintf(stderr, "Unknown STM PID %x, please report\n",
+                    desc.idProduct);
 	}
 	if (info.stinfo_dev_handle)
 	    break;}
