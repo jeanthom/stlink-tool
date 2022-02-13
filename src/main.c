@@ -145,6 +145,12 @@ rescan:
 	       fprintf(stderr, "Can not open STLINK/Application!\n");
 	       continue;
 	    }
+	    if (libusb_claim_interface(info.stinfo_dev_handle, 0)) {
+	       fprintf(stderr,"Unable to claim USB interface ! "
+	                      "Please close all programs that "
+	                      "may communicate with an ST-Link dongle.\n");
+	        continue;
+	    }
 	    res = stlink_dfu_mode(info.stinfo_dev_handle, 0);
 	    if (res != 0x8000) {
 		libusb_release_interface(info.stinfo_dev_handle, 0);
